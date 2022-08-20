@@ -3,7 +3,7 @@ from inspect import _void
 from multiprocessing.dummy import Array
 
 
-class CSV_Excel:
+class CSVExcel:
     sheet = []
 
     def append_row(self, row_content: Array) -> _void:

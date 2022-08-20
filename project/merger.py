@@ -1,6 +1,6 @@
 from inspect import _void
 from multiprocessing.dummy import Array
-from model.csv_excel import CSV_Excel
+from model.csv_excel import CSVExcel
 
 def _read_file_content(file_path: str) -> str:
     f = open(file_path)
@@ -8,7 +8,7 @@ def _read_file_content(file_path: str) -> str:
     f.close()
     return content
 
-def _set_excel_header(set_on: CSV_Excel, path_reference_file: str) -> _void:
+def _set_excel_header(set_on: CSVExcel, path_reference_file: str) -> _void:
     lines = _read_file_content(path_reference_file)
     curr_headers = (lines[0].replace("\n", "").split(","))
     csv_header = []
@@ -16,7 +16,7 @@ def _set_excel_header(set_on: CSV_Excel, path_reference_file: str) -> _void:
         csv_header.append(curr_headers[i].lower())
     set_on.append_row(csv_header)
 
-def _merge_csv_text(merge_on: CSV_Excel, csv_text_lines: str) -> _void:
+def _merge_csv_text(merge_on: CSVExcel, csv_text_lines: str) -> _void:
     """Merges a excel file into the current excel object.
 
     It will auto-conflict and sort out any headers that is misaligned
@@ -39,7 +39,7 @@ def _merge_csv_text(merge_on: CSV_Excel, csv_text_lines: str) -> _void:
     for i in range(len(curr_headers)):
         indexing_order.append(main_headers.index(curr_headers[i]))
     
-    for i in range(i, len(csv_text_lines)):
+    for i in range(1, len(csv_text_lines)):
         # Append row-by-row
         curr_row_line = csv_text_lines[i].replace("\n", "").split(",")
         curr_row_item = []
@@ -58,7 +58,7 @@ def merge_excels(excel_file_paths: Array, saved_file_path: str) -> _void:
     saved_file_path : str,
         Path to save the merged excel file
     """
-    merged_csv_excel = CSV_Excel()
+    merged_csv_excel = CSVExcel()
     _set_excel_header(merged_csv_excel, excel_file_paths[0])
 
     # Read each file and merge them
