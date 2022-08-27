@@ -1,5 +1,5 @@
-from data import Data
-from chart_type import ChartType
+from model.data import Data
+from model.chart_type import ChartType
 
 class VisualChart:
     def __init__(self, title, x_data: Data, y_data: Data, chart_type: ChartType):
