@@ -16,7 +16,7 @@ def _set_excel_header(set_on: CSVExcel, path_reference_file: str) -> _void:
         csv_header.append(curr_headers[i].lower())
     set_on.append_row(csv_header)
 
-def _merge_csv_text(merge_on: CSVExcel, csv_text_lines: str) -> _void:
+def _merge_csv_text(merge_on: CSVExcel, csv_text_lines: str, filter_empty = True) -> _void:
     """Merges a excel file into the current excel object.
 
     It will auto-conflict and sort out any headers that is misaligned
@@ -31,6 +31,9 @@ def _merge_csv_text(merge_on: CSVExcel, csv_text_lines: str) -> _void:
 
     csv_text_lines : str,
         Path to the excel file to fetch and merge
+    
+    filter_empty: Boolean,
+        If True, it will remove any row that has a empty entry
     """
     # We find the indexing order to sort the columns properly when merging
     indexing_order = []
@@ -42,10 +45,20 @@ def _merge_csv_text(merge_on: CSVExcel, csv_text_lines: str) -> _void:
     for i in range(1, len(csv_text_lines)):
         # Append row-by-row
         curr_row_line = csv_text_lines[i].replace("\n", "").split(",")
-        curr_row_item = []
+        curr_row_items = []
+
+        abort_curr_row = False
         for index in indexing_order:
-            curr_row_item.append(curr_row_line[index])
-        merge_on.append_row(curr_row_item)
+            item = curr_row_line[index]
+            if not item.strip() and filter_empty:
+                abort_curr_row = True
+                break
+            else:
+                curr_row_items.append(curr_row_line[index])
+        if abort_curr_row:
+            continue
+        else:
+            merge_on.append_row(curr_row_items)
 
 def merge_excels(excel_file_paths: Array, saved_file_path: str) -> _void:
     """Merges all the given text-based CSV excel file into one based on the given headers.

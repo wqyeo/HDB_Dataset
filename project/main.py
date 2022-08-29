@@ -1,5 +1,5 @@
 from merger import merge_excels
-from charter import visual_chart
+from charter import visual_chart, test
 
 from model.data_category import DataCategory
 from model.data import Data
@@ -14,8 +14,9 @@ merge_excels(EXCEL_FILE_LOCATIONS, MERGED_FILE_PATH)
 
 OUTPUT_VISUAL_CHART_PATH = ("project\VisualCharts\debug.png")
 
-x_data = Data("resale_price", DataCategory.NUMBERS)
-y_data = Data("remaining_lease", DataCategory.DATE_REMAINING)
-debug_chart = VisualChart("Debug", x_data, y_data, ChartType.LINE_GRAPH)
+y_data = Data("resale_price", DataCategory.NUMBERS, "Resale Price")
+x_data = Data("remaining_lease", DataCategory.DATE_REMAINING, "Remaining Lease (Years)")
+debug_chart = VisualChart("Resale Price over Remaining Lease", x_data, y_data, ChartType.LINE_GRAPH)
 
 visual_chart(MERGED_FILE_PATH, debug_chart, OUTPUT_VISUAL_CHART_PATH)
+#test(OUTPUT_VISUAL_CHART_PATH)
