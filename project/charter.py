@@ -1,6 +1,7 @@
 from ast import Str
 from inspect import _void
 from multiprocessing.dummy import Array
+from tkinter import Grid
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.pyplot import figure
@@ -9,6 +10,11 @@ from model.data import Data
 from model.charts.visual_chart import VisualChart
 from model.charts.bar_chart import BarChart
 from model.charts.line_chart import LineChart
+
+from model.chart_configs.visual_chart_config import VisualChartConfig
+from model.chart_configs.grid_config import GridConfig
+from model.chart_configs.bar_plot_config import BarPlotConfig
+from model.chart_configs.plot_config import PlotConfig
 
 def _read_file_content(file_path: str):
     f = open(file_path)
@@ -38,37 +44,47 @@ def _get_column_data_from_excel(excel_content: Array, header_name: str) -> Array
             column_data.append(curr_row_data)
     return column_data
 
-def visual_chart(excel_file_path: str, visual_chart: VisualChart,  output_path: str) -> _void:
+def visual_chart(excel_file_path: str, visual_chart: VisualChart,  output_path: str, visual_chart_config: VisualChartConfig = None) -> _void:
     excel_content = _read_file_content(excel_file_path)
-
+    plt.clf()
     if isinstance(visual_chart, LineChart):
-        print_line_chart(excel_content, visual_chart, output_path)
+        print_line_chart(excel_content, visual_chart, output_path, visual_chart_config)
     elif isinstance(visual_chart, BarChart):
-        print_bar_chart(excel_content, visual_chart, output_path)
+        print_bar_chart(excel_content, visual_chart, output_path, visual_chart_config)
     else:
         raise ValueError("visual_chart: Unknown type of Chart")
-    plt.clf()
+    print("Printed a '" + visual_chart.title + "' chart to " + output_path)
 
-def print_bar_chart(excel_content: str, bar_chart: BarChart, output_path: str) -> _void:
+def print_bar_chart(excel_content: str, bar_chart: BarChart, output_path: str, visual_chart_config: VisualChartConfig) -> _void:
     raw_data = _get_column_data_from_excel(excel_content, bar_chart.data.name)
     bar_chart.data.set_data_from_raw(raw_data)
 
-    # Get both axis first (Towns)
-
+    # Get both axis first
     # Y axis = Value
     # X axis = Labels
     y_points = []
     x_points = []
-
     for p in bar_chart.data.points:
         x_points.append(p.label)
         y_points.append(p.value)
 
     # TODO: Accept a settings input
     #plt.rc('font', size=15)
-    plt.figure(figsize=(50, 5))
-    plt.bar(x_points, y_points, align='center', width=0.4)
-    plt.grid(axis = 'y', linestyle = '--', linewidth = 0.5)
+    if not visual_chart_config == None:
+        if not visual_chart_config.figure_size == None:
+            plt.figure(figsize=(visual_chart_config.figure_size.x_size, visual_chart_config.figure_size.y_size))
+
+    bar_plot_config = BarPlotConfig()
+    grid_config = GridConfig()
+    if not visual_chart_config == None:
+        if not visual_chart_config.plot_config == None:
+            if isinstance(visual_chart_config.plot_config, BarPlotConfig):
+                bar_plot_config = visual_chart_config.plot_config
+        if not visual_chart_config.grid_config == None:
+            grid_config = visual_chart_config.grid_config
+                
+    plt.bar(x_points, y_points, align= bar_plot_config.align, width= bar_plot_config.width) 
+    plt.grid(axis = grid_config.get_target_axis(), linestyle = grid_config.linestyle, linewidth = grid_config.linewidth, which = grid_config.get_target_grid())
 
     plt.title(bar_chart.title)
     plt.xlabel(bar_chart.x_name)
@@ -76,16 +92,20 @@ def print_bar_chart(excel_content: str, bar_chart: BarChart, output_path: str) -
 
     plt.savefig(output_path)
 
-def print_line_chart(excel_content: str, line_chart: LineChart, output_path: str) -> _void:
+def print_line_chart(excel_content: str, line_chart: LineChart, output_path: str, visual_chart_config: VisualChartConfig) -> _void:
     x_raw_data = _get_column_data_from_excel(excel_content, line_chart.x_data.name)
     line_chart.x_data.set_data_from_raw(x_raw_data)
 
     y_raw_data = _get_column_data_from_excel(excel_content, line_chart.y_data.name)
     line_chart.y_data.set_data_from_raw(y_raw_data)
 
-    plt.plot(line_chart.x_data.get_data_value(), line_chart.y_data.get_data_value())
+    grid_config = GridConfig()
+    if not visual_chart_config == None:
+        if not visual_chart_config.grid_config == None:
+            grid_config = visual_chart_config.grid_config
 
-    plt.grid(linestyle = '--', linewidth = 0.5)
+    plt.plot(line_chart.x_data.get_data_value(), line_chart.y_data.get_data_value())
+    plt.grid(axis = grid_config.get_target_axis(), linestyle = grid_config.linestyle, linewidth = grid_config.linewidth, which = grid_config.get_target_grid())
     plt.title(line_chart.title)
     plt.xlabel(line_chart.x_data.display_name)
     plt.ylabel(line_chart.y_data.display_name)

@@ -6,6 +6,10 @@ from model.data_category import DataCategory
 from model.data import Data
 from model.charts.line_chart import LineChart
 from model.charts.bar_chart import BarChart
+from model.chart_configs.grid_config import GridConfig
+from model.chart_configs.target_axis import TargetAxis
+from model.chart_configs.visual_chart_config import VisualChartConfig
+from model.chart_configs.figure_size import FigureSize
 
 def make_rsrl_chart() -> _void:
     """
@@ -20,9 +24,12 @@ def make_hitc_chart() -> _void:
     """
     Bar Chart showing how many houses are there in a specific town
     """
+    grid_config = GridConfig(target_axis= TargetAxis.Y)
+    figure_size = FigureSize(50, 6)
+
     data = Data("town", DataCategory.TOWN, "Town")
     hitc_bar_chart = BarChart("Houses in a Town", "Town", "Houses Count", data)
-    visual_chart(MERGED_FILE_PATH, hitc_bar_chart, "project\VisualCharts\\houses_in_town_count.png")
+    visual_chart(MERGED_FILE_PATH, hitc_bar_chart, "project\VisualCharts\\houses_in_town_count.png", VisualChartConfig(grid_config=grid_config, figure_size=figure_size))
 
 # NOTE: The all excel files are converted to a text-csv file first before merging.
 EXCEL_FILE_LOCATIONS = [("project\Dataset\HDB Dataset - Jan.csv"), ("project\Dataset\HDB Dataset - Feb.csv")]
