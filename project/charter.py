@@ -15,6 +15,7 @@ from model.chart_configs.visual_chart_config import VisualChartConfig
 from model.chart_configs.grid_config import GridConfig
 from model.chart_configs.bar_plot_config import BarPlotConfig
 from model.chart_configs.plot_config import PlotConfig
+from model.charts.pie_chart import PieChart
 
 def _read_file_content(file_path: str):
     f = open(file_path)
@@ -45,12 +46,21 @@ def _get_column_data_from_excel(excel_content: Array, header_name: str) -> Array
     return column_data
 
 def visual_chart(excel_file_path: str, visual_chart: VisualChart,  output_path: str, visual_chart_config: VisualChartConfig = None) -> _void:
-    excel_content = _read_file_content(excel_file_path)
     plt.clf()
+    plt.cla()
+    plt.close()
+    plt.rcParams["figure.figsize"]
+    if not visual_chart_config == None:
+        if not visual_chart_config.figure_size == None:
+            plt.figure(figsize=(visual_chart_config.figure_size.x_size, visual_chart_config.figure_size.y_size))
+
+    excel_content = _read_file_content(excel_file_path)
     if isinstance(visual_chart, LineChart):
         print_line_chart(excel_content, visual_chart, output_path, visual_chart_config)
     elif isinstance(visual_chart, BarChart):
         print_bar_chart(excel_content, visual_chart, output_path, visual_chart_config)
+    elif isinstance(visual_chart, PieChart):
+        print_pie_chart(excel_content, visual_chart, output_path, visual_chart_config)
     else:
         raise ValueError("visual_chart: Unknown type of Chart")
     print("Printed a '" + visual_chart.title + "' chart to " + output_path)
@@ -111,6 +121,21 @@ def print_line_chart(excel_content: str, line_chart: LineChart, output_path: str
     plt.ylabel(line_chart.y_data.display_name)
 
     plt.savefig(output_path)
+
+def print_pie_chart(excel_content: str, pie_chart: PieChart, output_path: str, visual_chart_config: VisualChartConfig) -> _void:
+    raw_data = _get_column_data_from_excel(excel_content, pie_chart.data.name)
+    pie_chart.data.set_data_from_raw(raw_data)
+    pie_chart.data.cutoff_category(pie_chart.others_cut_off)
+
+    labels = []
+    values = []
+    for p in pie_chart.data.points:
+        labels.append(p.label)
+        values.append(p.value)
+
+    plt.pie(np.array(values), labels = labels)
+    plt.savefig(output_path)
+
 
 def test(output_path: str) -> _void:
     """

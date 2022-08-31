@@ -1,4 +1,5 @@
 from inspect import _void
+from numpy import *
 from model.data_category import DataCategory
 from model.point import Point
 from multiprocessing.dummy import Array
@@ -30,7 +31,12 @@ class Data:
                 # Pattern match to remove block number from house
                 # We only need to know the town it is in
                 town = re.sub(r'[0-9]', '', ele)
-                self._increment_value_to_town_point(town)
+                self._increment_value_to_category(town)
+
+        # For counting how many times a cateory occured
+        elif self.data_category == DataCategory.COUNTABLES:
+            for ele in raw_data:
+                self._increment_value_to_category(ele)
 
         # Others (raw Numerical data)
         else:
@@ -46,13 +52,13 @@ class Data:
                 return p
         return None
 
-    def _increment_value_to_town_point(self, town_label:str) -> _void:
-        p = self._find_point_by_label(town_label)
+    def _increment_value_to_category(self, category_label:str, increment_value: int = 1) -> _void:
+        p = self._find_point_by_label(category_label)
         if p == None:
-            p = Point(1, town_label)
+            p = Point(increment_value, category_label)
             self.points.append(p)
         else:
-            p.value += 1
+            p.value += increment_value
 
     def _get_point_from_date_remaining_str(self, input: str) -> Point:
         # Get year/month as string
@@ -70,3 +76,19 @@ class Data:
         value = float(years) + (months / 12.0)
         label = str(years) + "Y " + str(months) + "M"
         return Point(value, label)
+
+    def cutoff_category(self, cutoff_point: int) -> _void:
+        """
+        If data category is COUNTABLES or TOWN, it will cutoff
+        any value below the given into a category called 'others'
+        """
+        if not (self.data_category == DataCategory.COUNTABLES or self.data_category == DataCategory.TOWN):
+            print("Cannot cutoff data values, wrong data category")
+            return
+
+        refcopy = self.points.copy()
+
+        for p in refcopy:
+            if p.value < cutoff_point:
+                self.points.remove(p)
+                self._increment_value_to_category("Others", p.value)

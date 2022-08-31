@@ -3,5 +3,6 @@ from enum import Enum
 
 class DataCategory(Enum):
     NUMBERS = 1,
-    TOWN = 2,
+    COUNTABLES = 2, # Can be seperated into different categories and counted
     DATE_REMAINING = 3,
+    TOWN = 4
